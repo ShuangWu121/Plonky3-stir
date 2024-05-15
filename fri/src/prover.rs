@@ -13,7 +13,8 @@ use tracing::{info_span, instrument};
 use crate::{CommitPhaseProofStep, FriConfig, FriGenericConfig, FriProof, QueryProof};
 
 #[instrument(name = "FRI prover", skip_all)]
-pub fn prove<G, F, M, Challenger>(
+pub fn prove<G, F, M, Challenger>( //The <G, F, M, Challenger> part is called a generic parameter list. It defines generic 
+                                   //type parameters that can be used within the function's signature and body
     g: &G,
     config: &FriConfig<M>,
     inputs: Vec<Vec<F>>,
@@ -32,8 +33,10 @@ where
         .tuple_windows()
         .all(|(l, r)| l.len() >= r.len()));
 
+    // Computes `log_2(n)`
     let log_max_height = log2_strict_usize(inputs[0].len());
 
+    //
     let commit_phase_result = commit_phase(g, config, inputs, challenger);
 
     let pow_witness = challenger.grind(config.proof_of_work_bits);

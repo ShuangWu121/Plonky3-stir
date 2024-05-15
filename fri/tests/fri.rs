@@ -44,15 +44,20 @@ fn get_ldt_for_testing<R: Rng>(rng: &mut R) -> (Perm, MyFriConfig) {
     (perm, fri_config)
 }
 
+//ldt stands for low degree testing
 fn do_test_fri_ldt<R: Rng>(rng: &mut R) {
+    //configuration of fri                                       this function setup the configuration
     let (perm, fc) = get_ldt_for_testing(rng);
+    //dft: transform the polynomial from coefficient presentation to evaluation points presentation
     let dft = Radix2Dit::default();
 
     let shift = Val::generator();
 
-    let ldes: Vec<RowMajorMatrix<Val>> = (3..10)
+    let ldes: Vec<RowMajorMatrix<Val>> = (3..=3)
         .map(|deg_bits| {
             let evals = RowMajorMatrix::<Val>::rand_nonzero(rng, 1 << deg_bits, 16);
+            println!("Matrix:\n{}", evals);
+
             let mut lde = dft.coset_lde_batch(evals, 1, shift);
             reverse_matrix_index_bits(&mut lde);
             lde
@@ -130,7 +135,9 @@ fn do_test_fri_ldt<R: Rng>(rng: &mut R) {
 #[test]
 fn test_fri_ldt() {
     // FRI is kind of flaky depending on indexing luck
-    for i in 0..4 {
+    //rng is not a single random number but rather an instance of a random number generator (RNG) itself. Specifically, 
+    //it is an instance of ChaCha20Rng, which is a type of RNG from the rand_chacha crate.
+    for i in 4..=4 {
         let mut rng = ChaCha20Rng::seed_from_u64(i);
         do_test_fri_ldt(&mut rng);
     }

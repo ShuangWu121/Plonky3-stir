@@ -10,6 +10,8 @@ use p3_maybe_rayon::prelude::*;
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
+use core::fmt;
+
 
 use crate::Matrix;
 
@@ -30,6 +32,19 @@ pub type RowMajorMatrixViewMut<'a, T> = DenseMatrix<T, &'a mut [T]>;
 
 pub trait DenseStorage<T>: Borrow<[T]> + Into<Vec<T>> + Send + Sync {}
 impl<T, S: Borrow<[T]> + Into<Vec<T>> + Send + Sync> DenseStorage<T> for S {}
+
+impl<T: fmt::Display, V: Borrow<[T]>> fmt::Display for DenseMatrix<T, V> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let rows = self.values.borrow().len() / self.width;
+        for i in 0..rows {
+            for j in 0..self.width {
+                write!(f, "{}\t", self.values.borrow()[i * self.width + j])?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+}
 
 impl<T: Clone + Send + Sync + Default> DenseMatrix<T> {
     /// Create a new dense matrix of the given dimensions, backed by a `Vec`, and filled with
